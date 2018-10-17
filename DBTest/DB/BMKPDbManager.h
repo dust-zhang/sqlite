@@ -7,14 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "LogModel.h"
 
 @interface BMKPDbManager : NSObject
 
 +(instancetype)shareInstance;
 
 //插入数据
--(BOOL) insert:(NSString *)content;
+-(BOOL) insert:(LogModel *)model;
 
 //查找数据
 -(NSMutableArray *) select:(NSString *)sql;

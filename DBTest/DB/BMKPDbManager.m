@@ -18,9 +18,9 @@
 
 #import "BMKPDbManager.h"
 #import "BMKPDatabase.h"
-#import <FMDB.h>
+#import "FMDB.h"
 #import <sys/xattr.h>
-#import "LogModel.h"
+#import <objc/runtime.h>
 
 @interface BMKPDbManager()
 @property (nonatomic, retain)   NSLock *lock;
@@ -50,14 +50,46 @@
         self.lock = [[NSLock alloc ] init];
     }
 }
+
 /*
  将数据插入到数据库
  content : 要插入的字段数据
  return  :  如果成功则返回true，失败返回false
  */
--(BOOL) insert:(NSString *)content
+-(BOOL) insert:(LogModel *)model
 {
     [self initQueue];
+    
+    //获取到解析的model
+    NSMutableArray * arrProList = [self getModelProperty:model];
+    NSString * strNames = @"";
+    NSString * strValues = @"";
+    // 1.通过runtime获取模型的属性列表,遍历得到每一个属性名字colName,将属性名字拼接成sql需要的格式
+    // 2.同样通过runtime获得属性对应的value值,拼接成sql语句需要的格式插入
+    // 3.拼接完成插入数据库.
+    for (int i = 0; i<arrProList.count; i++)
+    {
+        NSString * colName = arrProList[i];
+        if ( ![ colName isEqualToString:@"logId"])
+        {
+            NSString * colValue = @"";
+            const char * proName = [[NSString stringWithFormat:@"_%@",colName] UTF8String];
+            Ivar ivar = class_getInstanceVariable([model class], proName);
+            colValue = object_getIvar(model, ivar);
+            
+            if (i < arrProList.count - 1)
+            {
+                strNames = [strNames stringByAppendingString:[NSString stringWithFormat:@"'%@',", colName]];
+                strValues = [strValues stringByAppendingString:[NSString stringWithFormat:@"'%@',", colValue]];
+            }
+            else if (i == arrProList.count - 1)
+            {
+                strNames = [strNames stringByAppendingString:[NSString stringWithFormat:@"'%@'", colName]];
+                strValues = [strValues stringByAppendingString:[NSString stringWithFormat:@"'%@'", colValue]];
+            }
+        }
+    }
+    NSString * sqlInsert = [NSString stringWithFormat:@"insert into '%@' (%@) values (%@)", TABLE_NAME, strNames, strValues];
     
     FMDatabase *database  = [FMDatabase databaseWithPath:[BMKPDatabase getDbPath]];
     if (![database open])
@@ -68,13 +100,32 @@
     __weak typeof(self) weakSelf = self;
     dispatch_async(self.queue, ^{
         [weakSelf.lock lock];
-        [database executeUpdate:@"insert into table_bmkplog values (null,?)",content];
+        [database executeUpdate:sqlInsert];
         [database close];
         [weakSelf.lock unlock];
     });
     
     return TRUE;
 }
+
+/*
+ 获取模型的属性,通过runtime, 并返回属性列表
+ model : 要插入的model
+ return  :返回model字段数组
+ */
+-(NSMutableArray *)getModelProperty:(id)model {
+   
+    u_int count = 0;
+    objc_property_t *properties = class_copyPropertyList([model class], &count);
+    NSMutableArray * arrM = @[].mutableCopy;
+    for (int i = 0; i < count; i++) {
+        const char *propertyName = property_getName(properties[i]);
+        NSString *str = [NSString stringWithCString:propertyName encoding:NSUTF8StringEncoding];
+        [arrM addObject:str];
+    }
+    return arrM;
+}
+
 
 /*
  删除数据
@@ -154,8 +205,21 @@
         while ([set next])
         {
             LogModel * model= [[LogModel alloc ] init ];
-            model.Content = [set stringForColumn:@"logContent"];
-            model.logId = [NSNumber numberWithInt:[[set stringForColumn:@"id"] intValue]];
+            model.logId = [NSNumber numberWithInt:[[set stringForColumn:@"logId"] intValue]];
+            model.deviceKey = [set stringForColumn:@"deviceKey"];
+            model.drvId = [set stringForColumn:@"drvId"];
+            model.deviceTime = [set stringForColumn:@"deviceTime"];
+            model.walkerPhone = [set stringForColumn:@"walkerPhone"];
+            model.altitude = [set stringForColumn:@"altitude"];
+            model.direction = [set stringForColumn:@"direction"];
+            model.time = [set stringForColumn:@"time"];
+            model.latitude = [set stringForColumn:@"latitude"];
+            model.longtitude = [set stringForColumn:@"longtitude"];
+            model.orderId = [set stringForColumn:@"orderId"];
+            model.phoneTime = [set stringForColumn:@"phoneTime"];
+            model.speed = [set stringForColumn:@"speed"];
+            model.locType = [set stringForColumn:@"locType"];
+            
             [array addObject:model];
         }
         [database close];

@@ -38,8 +38,8 @@ class ViewController: UIViewController {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-        BMKPDbManager.shareInstance().insert("zhang")
+        let model = LogModel.init()
+        BMKPDbManager.shareInstance().insert(model)
         
         
     }

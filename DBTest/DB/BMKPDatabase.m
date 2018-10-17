@@ -10,13 +10,10 @@
 //对数据库的操作在BMKPDbManager中实现
 
 #import "BMKPDatabase.h"
-#import <FMDB.h>
+#import "FMDB.h"
+#import "LogModel.h"
 #import <sys/xattr.h>
-// 数据库名字
-#define BMKPDB_NAME  @"bmkp.db"
-// 表
-#define TABLE_NAME  @"CREATE TABLE IF NOT EXISTS table_bmkplog (id INTEGER PRIMARY KEY AUTOINCREMENT,logContent text)"
-
+#import <objc/runtime.h>
 
 @implementation BMKPDatabase
 
@@ -42,7 +39,7 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     NSString *docPath = [paths objectAtIndex:0];
     NSLog(@"%@",docPath);
-    return [docPath stringByAppendingPathComponent:BMKPDB_NAME];
+    return [docPath stringByAppendingPathComponent:DB_NAME];
 }
 
 /*
@@ -73,8 +70,9 @@
  sql        :  创建数据库table的sql语句
  return     :  如果成功则返回true，失败返回false
  */
-+(BOOL) createTable:(NSString *)sql
++(BOOL) createTable:(NSString *)tableName
 {
+     NSString * strSql = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS '%@' (logId INTEGER PRIMARY KEY AUTOINCREMENT)", tableName];
     //防止文件备份到icould
     [self addSkipBackupAttributeToItemAtURL:[NSURL fileURLWithPath:[self getDbPath] ]];
     //获取数据库并打开
@@ -85,14 +83,57 @@
         return FALSE;
     }
     //创建栏目表
-    if (![database executeUpdate:sql] )
+    if ([database executeUpdate:strSql] )
     {
+        NSMutableArray * arrProList = [self getModelProperty];
+        // 动态插入列
+        for (int i = 0; i<arrProList.count; i++)
+        {
+            NSString * colName = arrProList[i];
+            if (![database columnExists:colName inTableWithName:tableName])
+            {
+                //logId 自增字段，已经创建，不需要重复创建
+                if (![colName isEqualToString: @"logId"])
+                {
+                    NSString * alerColStr = [NSString stringWithFormat:@"AlTER TABLE %@ ADD %@ TEXT", tableName, colName];
+                    BOOL isSuccess = [database executeUpdate:alerColStr];
+                    if (isSuccess)
+                    {
+                        NSLog(@"插入新key成功 = %@", colName);
+                    }
+                    else
+                    {
+                        NSLog(@"插入新key失败 = %@", colName);
+                    }
+                }
+            }
+        }
+        
+        [database commit];
         [database close];
         return TRUE;
     }
     //关闭数据库
     [database close];
     return TRUE;
+}
+
+/*
+ 获取模型的属性,通过runtime, 并返回属性列表
+ model : 要插入的model
+ return  :返回model字段数组
+ */
++(NSMutableArray *)getModelProperty {
+    LogModel *model = [[LogModel alloc ] init];
+    u_int count = 0;
+    objc_property_t *properties = class_copyPropertyList([model class], &count);
+    NSMutableArray * arrM = @[].mutableCopy;
+    for (int i = 0; i < count; i++) {
+        const char *propertyName = property_getName(properties[i]);
+        NSString *str = [NSString stringWithCString:propertyName encoding:NSUTF8StringEncoding];
+        [arrM addObject:str];
+    }
+    return arrM;
 }
 
 @end

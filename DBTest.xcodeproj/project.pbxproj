@@ -16,7 +16,6 @@
 		8F140839214A0B7E00B025AB /* LogModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F140831214A0B7E00B025AB /* LogModel.m */; };
 		8F14083A214A0B7E00B025AB /* BMKPDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F140832214A0B7E00B025AB /* BMKPDatabase.m */; };
 		8F14083B214A0B7E00B025AB /* UpLoadLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F140837214A0B7E00B025AB /* UpLoadLog.m */; };
-		8F78686C215B653500D288DF /* 1537944983087.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8F78686B215B653500D288DF /* 1537944983087.jpg */; };
 		D51B703338526B450FE0EF2F /* libPods-DBTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4402FFDB3615AFD9B58A7EA8 /* libPods-DBTest.a */; };
 /* End PBXBuildFile section */
 
@@ -40,7 +39,6 @@
 		8F140836214A0B7E00B025AB /* LogModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogModel.h; sourceTree = "<group>"; };
 		8F140837214A0B7E00B025AB /* UpLoadLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpLoadLog.m; sourceTree = "<group>"; };
 		8F50161F214A0C5F00231EC5 /* DBTest-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DBTest-Bridging-Header.h"; sourceTree = "<group>"; };
-		8F78686B215B653500D288DF /* 1537944983087.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = 1537944983087.jpg; path = ../1537944983087.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,7 +65,6 @@
 		8F140811214A0B5400B025AB = {
 			isa = PBXGroup;
 			children = (
-				8F78686B215B653500D288DF /* 1537944983087.jpg */,
 				8F50161F214A0C5F00231EC5 /* DBTest-Bridging-Header.h */,
 				8F14081C214A0B5500B025AB /* DBTest */,
 				8F14081B214A0B5400B025AB /* Products */,
@@ -180,7 +177,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8F78686C215B653500D288DF /* 1537944983087.jpg in Resources */,
 				8F140828214A0B5700B025AB /* LaunchScreen.storyboard in Resources */,
 				8F140825214A0B5700B025AB /* Assets.xcassets in Resources */,
 				8F140823214A0B5500B025AB /* Main.storyboard in Resources */,

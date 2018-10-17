@@ -7,6 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+// 数据库名字
+#define DB_NAME  @"bmkp_location.db"
+// 表
+#define TABLE_NAME @"tableTrackLog"
 
 @interface BMKPDatabase : NSObject
 
